@@ -14,6 +14,7 @@ import {
   CRow,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
+import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 import axios from 'axios' // Don't forget to import axios
 
@@ -22,6 +23,8 @@ const Login = () => {
     userName: '',
     password: '',
   })
+  const [errors, setErrors] = useState({})
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -29,32 +32,60 @@ const Login = () => {
       ...prevCredentials,
       [name]: value,
     }))
+    // Clear the error message when typing in the input fields
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: '',
+    }))
+  }
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible)
+  }
+
+  const validateLoginForm = () => {
+    const { userName, password } = credentials
+    const errors = {}
+
+    if (!userName.trim()) {
+      errors.userName = 'Username is required'
+    }
+
+    if (!password.trim()) {
+      errors.password = 'Password is required'
+    } else if (password.length < 6) {
+      errors.password = 'Password must be at least 6 characters long'
+    }
+
+    setErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   const handleLogin = () => {
-    const userData = {
-      username: credentials.userName,
-      password: credentials.password,
+    const isValid = validateLoginForm()
+    if (isValid) {
+      const userData = {
+        username: credentials.userName,
+        password: credentials.password,
+      }
+      axios
+        .post(`${process.env.REACT_APP_LOGIN_BASE_URL}/jwt-auth/v1/token`, userData)
+        .then((resp) => {
+          console.log('resp =>', resp)
+          if (resp.status === 200) {
+            console.log('User added successfully.')
+
+            localStorage.setItem('userdata', JSON.stringify(resp.data))
+            setCredentials({
+              userName: '',
+              password: '',
+            })
+            window.location.reload()
+          }
+        })
+        .catch((err) => {
+          console.error('save_error =>', err)
+        })
     }
-
-    axios
-      .post(`${process.env.REACT_APP_LOGIN_BASE_URL}/jwt-auth/v1/token`, userData)
-      .then((resp) => {
-        console.log('resp =>', resp)
-        if (resp.status === 200) {
-          console.log('User added successfully.')
-
-          localStorage.setItem('userdata', JSON.stringify(resp.data))
-          setCredentials({
-            userName: '',
-            password: '',
-          })
-          window.location.reload()
-        }
-      })
-      .catch((err) => {
-        console.error('save_error =>', err)
-      })
   }
 
   return (
@@ -79,31 +110,27 @@ const Login = () => {
                         onChange={handleInputChange}
                       />
                     </CInputGroup>
+                    {errors.userName && <div className="text-danger">{errors.userName}</div>}
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
                         <CIcon icon={cilLockLocked} />
                       </CInputGroupText>
                       <CFormInput
-                        type="password"
+                        type={isPasswordVisible ? 'text' : 'password'}
                         placeholder="Password"
                         autoComplete="current-password"
                         name="password"
                         value={credentials.password}
                         onChange={handleInputChange}
                       />
+                      <CInputGroupText onClick={togglePasswordVisibility}>
+                        {isPasswordVisible ? <AiFillEye /> : <AiFillEyeInvisible />}
+                      </CInputGroupText>
                     </CInputGroup>
-                    <CRow>
-                      <CCol xs={6}>
-                        <CButton color="primary" className="px-4" onClick={handleLogin}>
-                          Login
-                        </CButton>
-                      </CCol>
-                      <CCol xs={6} className="text-right">
-                        <CButton color="link" className="px-0">
-                          Forgot password?
-                        </CButton>
-                      </CCol>
-                    </CRow>
+                    {errors.password && <div className="text-danger">{errors.password}</div>}
+                    <CButton color="primary" className="px-4" onClick={handleLogin}>
+                      Login
+                    </CButton>
                   </CForm>
                 </CCardBody>
               </CCard>
@@ -111,10 +138,6 @@ const Login = () => {
                 <CCardBody className="text-center">
                   <div>
                     <h2>Sign up</h2>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                      tempor incididunt ut labore et dolore magna aliqua.
-                    </p>
                     <Link to="/register">
                       <CButton color="primary" className="mt-3" active tabIndex={-1}>
                         Register Now!
