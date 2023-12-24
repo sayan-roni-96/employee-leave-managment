@@ -1,6 +1,7 @@
 import React, { Component, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './scss/style.scss'
+import EmployeeLeaveDetails from './views/pages/employeeLeave/EmployeeLeaveDetails'
 
 const loading = (
   <div className="pt-3 text-center">
@@ -33,7 +34,10 @@ class App extends Component {
         <Suspense fallback={loading}>
           <Routes>
             {isAuthenticated ? (
-              <Route path="*" element={<DefaultLayout />} />
+              <>
+                <Route path="*" element={<DefaultLayout />} />
+                {/* <Route exact path="/employeeleavedetails" element={<EmployeeLeaveDetails />} /> */}
+              </>
             ) : (
               <>
                 <Route exact path="/login" name="Login Page" element={<Login />} />
