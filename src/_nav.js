@@ -274,6 +274,11 @@ const _nav = [
     items: [
       {
         component: CNavItem,
+        name: 'Employee Leave Details',
+        to: '/dashboard/employeeleavedetails',
+      },
+      {
+        component: CNavItem,
         name: 'Login',
         to: '/login',
       },
