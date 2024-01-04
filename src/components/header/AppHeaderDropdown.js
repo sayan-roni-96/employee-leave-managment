@@ -38,7 +38,7 @@ const AppHeaderDropdown = () => {
 
     // Data show after login
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('lMuserDataToken')
+    const loggedInUser = localStorage.getItem('userdata')
     // console.log('loggedInUser', loggedInUser)
     if (loggedInUser) {
       const foundUser = JSON.parse(loggedInUser)
