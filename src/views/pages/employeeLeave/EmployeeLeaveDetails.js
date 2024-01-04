@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getApplyLeaveDetails } from 'src/store/actions/employeeLeaveAction'
 import DataTable from 'react-data-table-component'
@@ -14,6 +14,9 @@ const EmployeeLeaveDetails = () => {
     // Dispatch the action to get leave details
     dispatch(getApplyLeaveDetails())
   }, [])
+
+  const [filteredData, setFilteredData] = useState([])
+  const [searchText, setSearchText] = useState('')
 
   const columns = [
     {
@@ -32,7 +35,7 @@ const EmployeeLeaveDetails = () => {
       sortable: true,
     },
     {
-      name: 'Employee Name',
+      name: 'Manager Name',
       selector: 'display_name',
       sortable: true,
     },
@@ -44,19 +47,35 @@ const EmployeeLeaveDetails = () => {
     // Add more columns as needed
   ]
 
+  useEffect(() => {
+    if (allEmployeeLeaveData.data) {
+      setFilteredData(allEmployeeLeaveData.data)
+    }
+  }, [allEmployeeLeaveData])
+
+  const handleSearch = (e) => {
+    const keyword = e.target.value.toLowerCase()
+    setSearchText(keyword)
+    const filtered = allEmployeeLeaveData.data.filter((item) =>
+      item.display_name.toLowerCase().includes(keyword),
+    )
+    setFilteredData(filtered)
+  }
+
   return (
     <div>
       <h1>Employee Leave Details</h1>
+      <input
+        type="text"
+        placeholder="Search by Manager Name"
+        value={searchText}
+        onChange={handleSearch}
+      />
       {/* Check isLoading to show loading indicator */}
       {isLoading ? (
         <div>Loading...</div>
       ) : Array.isArray(allEmployeeLeaveData.data) ? (
-        <DataTable
-          title="Leave Details"
-          columns={columns}
-          data={allEmployeeLeaveData.data}
-          pagination
-        />
+        <DataTable title="Leave Details" columns={columns} data={filteredData} pagination />
       ) : (
         <div>No leave data available</div>
       )}
