@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {
   CAvatar,
   CBadge,
@@ -24,15 +24,34 @@ import CIcon from '@coreui/icons-react'
 
 import avatar8 from './../../assets/images/avatars/9.jpg'
 
+
+import Avatar from 'react-avatar'
+
 const AppHeaderDropdown = () => {
+
+  
+  const [user, setUser] = useState({})
   const LogOut = () => {
     localStorage.removeItem('userdata')
     window.location.reload()
   }
+
+    // Data show after login
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem('lMuserDataToken')
+    // console.log('loggedInUser', loggedInUser)
+    if (loggedInUser) {
+      const foundUser = JSON.parse(loggedInUser)
+      console.log('foundUser', foundUser)
+      setUser(foundUser)
+    }
+  }, [])
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0" caret={false}>
-        <CAvatar src={avatar8} size="md" />
+        // <CAvatar src={avatar8} size="md" />
+
+    <Avatar className="mr-2" name={user && user.user_nicename} size="45" round={true} />
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
         <CDropdownHeader className="bg-light fw-semibold py-2">Account</CDropdownHeader>
